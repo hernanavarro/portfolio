@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hernán Navarro</title>
+<meta name="description" content="Hernán Navarro, Ssr. Software Engineer en Mercado Libre. Córdoba, Argentina." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #13110d;
+    --bg-soft: #1a1610;
+    --surface: #1f1a13;
+    --surface-raised: #262017;
+    --border: #34291c;
+    --border-soft: #251f16;
+    --text: #f2ede2;
+    --text-muted: #a89a80;
+    --text-faint: #6e6250;
+    --accent: #e8a13a;
+    --accent-strong: #ffb84d;
+    --accent-dim: #5c451f;
+    --accent-bg: rgba(232, 161, 58, 0.09);
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --gutter: 22px;
+    --sidebar-w: 248px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+  }
+
+  a { color: inherit; }
+
+  .skip-link {
+    position: absolute; left: -9999px; top: 0;
+    background: var(--accent); color: #1a1408; padding: 10px 16px;
+    z-index: 200; font-family: var(--mono); font-size: 13px;
+  }
+  .skip-link:focus { left: var(--gutter); top: var(--gutter); }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 16px; height: 1px;
+    background: var(--accent-dim);
+  }
+
+  h1, h2, h3 { font-family: var(--mono); font-weight: 600; margin: 0; text-wrap: balance; color: var(--text); }
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+    gap: 56px;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    padding: 34px 0 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .brand {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .brand .path { color: var(--text-faint); font-weight: 400; }
+  .brand .file { color: var(--accent-strong); }
+  .brand-role {
+    margin-top: 6px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .nav-tree { margin-top: 46px; }
+  .nav-tree ul { list-style: none; margin: 0; padding: 0; }
+  .nav-tree li { border-left: 1px solid var(--border-soft); }
+  .nav-tree a {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    color: var(--text-muted);
+    padding: 8px 0 8px 16px;
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+    transition: color .15s ease, border-color .15s ease;
+  }
+  .nav-tree a .num { color: var(--text-faint); font-size: 12px; }
+  .nav-tree a:hover { color: var(--text); }
+  .nav-tree li.active a {
+    color: var(--accent-strong);
+    border-left-color: var(--accent);
+  }
+
+  .sidebar-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+  }
+  .status-line { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #6bbf7a; box-shadow: 0 0 0 3px rgba(107,191,122,0.15); flex: none; }
+  .sidebar-links { display: flex; gap: 14px; }
+  .sidebar-links a { color: var(--text-muted); text-decoration: none; border-bottom: 1px solid transparent; }
+  .sidebar-links a:hover { color: var(--accent-strong); border-bottom-color: var(--accent-dim); }
+
+  .mobile-nav { display: none; }
+
+  /* ---------- Main ---------- */
+  main { min-width: 0; padding-bottom: 40px; }
+
+  section {
+    position: relative;
+    padding: 86px 0 0 40px;
+    border-left: 1px solid var(--border-soft);
+  }
+  section:first-of-type { padding-top: 46px; }
+  .ln {
+    position: absolute;
+    left: -34px;
+    top: 88px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  section:first-of-type .ln { top: 48px; }
+
+  .section-head { margin-bottom: 34px; }
+  .section-title { font-size: 22px; margin-top: 10px; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding-top: 8px; }
+  .hero-kicker {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .terminal {
+    margin-top: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .terminal-bar {
+    display: flex; align-items: center; gap: 7px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-raised);
+  }
+  .terminal-bar span {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--border);
+  }
+  .terminal-bar .title {
+    margin-left: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+    width: auto; height: auto; border-radius: 0; background: none;
+  }
+  .terminal-body {
+    padding: 22px 20px 26px;
+    font-family: var(--mono);
+    font-size: 15px;
+  }
+  .terminal-body .prompt { color: var(--text-faint); }
+  .terminal-body .cmd { color: var(--text); }
+  .terminal-line { margin: 0 0 4px; min-height: 1.6em; }
+  .terminal-out {
+    color: var(--accent-strong);
+    font-size: 26px;
+    font-weight: 700;
+    margin: 2px 0 14px;
+  }
+  .terminal-sub { color: var(--text-muted); font-size: 14.5px; margin: 0 0 4px; font-family: var(--sans); }
+  .caret {
+    display: inline-block;
+    width: 8px; height: 1.1em;
+    background: var(--accent);
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .hero-actions { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    text-decoration: none;
+    padding: 11px 18px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #1a1408; font-weight: 600; }
+  .btn.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+  .btn:not(.primary):hover { border-color: var(--accent-dim); color: var(--accent-strong); }
+
+  /* ---------- About ---------- */
+  .about-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; }
+  .about-text p { color: var(--text-muted); max-width: 62ch; margin: 0 0 14px; }
+  .about-text p:last-child { margin-bottom: 0; }
+  .facts { display: flex; flex-direction: column; gap: 14px; border-left: 1px solid var(--border-soft); padding-left: 22px; }
+  .fact dt { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); margin: 0; }
+  .fact dd { font-family: var(--sans); font-size: 14.5px; color: var(--text); margin: 3px 0 0; }
+
+  /* ---------- Experience ---------- */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .job {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 24px;
+    padding: 26px 0;
+    border-top: 1px solid var(--border-soft);
+  }
+  .job:first-child { border-top: none; padding-top: 0; }
+  .job-period { font-family: var(--mono); font-size: 12.5px; color: var(--text-faint); padding-top: 3px; }
+  .job-period .current { color: var(--accent-strong); }
+  .job-role { font-size: 17px; font-family: var(--mono); font-weight: 600; margin: 0 0 4px; }
+  .job-org { font-family: var(--sans); font-size: 14.5px; color: var(--accent-strong); margin: 0 0 10px; font-weight: 600; }
+  .job-desc { color: var(--text-muted); font-size: 14.5px; margin: 0; max-width: 58ch; }
+
+  /* ---------- Skills ---------- */
+  .soft-skills { margin-top: 38px; padding-top: 30px; border-top: 1px solid var(--border-soft); }
+  .soft-skills h3 { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 16px; font-weight: 600; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip {
+    font-family: var(--mono); font-size: 12.5px;
+    padding: 7px 12px; border: 1px solid var(--border);
+    border-radius: 20px; color: var(--text-muted);
+  }
+  .chip-tech { color: var(--accent-strong); border-color: var(--accent-dim); background: var(--accent-bg); }
+
+  /* ---------- Projects ---------- */
+  .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px; }
+  .project-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 18px 18px 16px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .project-card:hover { border-color: var(--accent-dim); transform: translateY(-2px); }
+  .project-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .project-name { font-family: var(--mono); font-size: 14.5px; font-weight: 600; color: var(--text); }
+  .project-arrow { color: var(--text-faint); font-size: 15px; }
+  .project-card:hover .project-arrow { color: var(--accent-strong); }
+  .project-desc { color: var(--text-muted); font-size: 13.5px; margin: 0; flex: 1; }
+  .project-lang { font-family: var(--mono); font-size: 11.5px; color: var(--text-faint); display: flex; align-items: center; gap: 7px; }
+  .project-lang::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-dim); }
+  .project-more { margin-top: 20px; font-family: var(--mono); font-size: 13.5px; }
+  .project-more a { color: var(--accent-strong); text-decoration: none; border-bottom: 1px solid var(--accent-dim); }
+  .project-more a:hover { border-color: var(--accent-strong); }
+
+  /* ---------- Education / Languages ---------- */
+  .split { display: grid; grid-template-columns: 1.3fr 1fr; gap: 48px; }
+  .edu-item { padding: 18px 0; border-top: 1px solid var(--border-soft); }
+  .edu-item:first-child { border-top: none; padding-top: 0; }
+  .edu-school { font-family: var(--mono); font-weight: 600; font-size: 15px; }
+  .edu-degree { color: var(--text-muted); font-size: 14px; margin: 3px 0; }
+  .edu-period { font-family: var(--mono); font-size: 12px; color: var(--text-faint); }
+  .lang-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .lang-list li { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 13.5px; padding-bottom: 10px; border-bottom: 1px solid var(--border-soft); }
+  .lang-level { color: var(--text-faint); }
+
+  /* ---------- Contact ---------- */
+  .contact-section { padding-bottom: 90px; }
+  .contact-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 44px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .contact-box h2 { font-size: 24px; }
+  .contact-box p { color: var(--text-muted); max-width: 50ch; margin: 0; }
+  .contact-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+
+  footer {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 26px 0 34px calc(var(--sidebar-w) + 56px + 40px);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; gap: 0; }
+    .sidebar { display: none; }
+    .mobile-nav {
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+      position: sticky; top: 0;
+      background: var(--bg);
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-soft);
+      z-index: 50;
+      font-family: var(--mono);
+      font-size: 12.5px;
+    }
+    .mobile-nav a { color: var(--text-muted); text-decoration: none; white-space: nowrap; }
+    .mobile-nav a.active { color: var(--accent-strong); }
+    section { padding-left: 26px; }
+    .ln { left: -20px; font-size: 10px; }
+    .about-grid, .split { grid-template-columns: 1fr; gap: 30px; }
+    .facts { border-left: none; padding-left: 0; border-top: 1px solid var(--border-soft); padding-top: 20px; }
+    .skills-grid { grid-template-columns: 1fr; }
+    .job { grid-template-columns: 1fr; gap: 6px; }
+    footer { padding-left: 26px; flex-direction: column; }
+  }
+  @media (max-width: 480px) {
+    :root { --gutter: 16px; }
+    .terminal-out { font-size: 20px; }
+    .contact-box { padding: 30px 22px; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div>
+      <div class="brand"><span class="path">~/</span><span class="file">hernan-navarro</span></div>
+      <div class="brand-role">Ssr. Software Engineer - Mercado Libre</div>
+
+      <nav class="nav-tree" aria-label="Secciones">
+        <ul>
+          <li class="active"><a href="#inicio"><span class="num">00</span>inicio.sh</a></li>
+          <li><a href="#sobre-mi"><span class="num">01</span>sobre-mi.md</a></li>
+          <li><a href="#experiencia"><span class="num">02</span>experiencia.log</a></li>
+          <li><a href="#stack"><span class="num">03</span>stack.json</a></li>
+          <li><a href="#proyectos"><span class="num">04</span>proyectos/</a></li>
+          <li><a href="#educacion"><span class="num">05</span>educacion.txt</a></li>
+          <li><a href="#contacto"><span class="num">06</span>contacto.sh</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="sidebar-links">
+        <a href="https://github.com/hernanavarro" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.linkedin.com/in/navarrohernan/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:navarro.hernan97@gmail.com">Email</a>
+      </div>
+    </div>
+  </aside>
+
+  <main id="main">
+    <nav class="mobile-nav" aria-label="Secciones">
+      <a href="#inicio">inicio</a>
+      <a href="#sobre-mi">sobre-mi</a>
+      <a href="#experiencia">experiencia</a>
+      <a href="#stack">stack</a>
+      <a href="#proyectos">proyectos</a>
+      <a href="#educacion">educación</a>
+      <a href="#contacto">contacto</a>
+    </nav>
+
+    <section id="inicio" class="hero">
+      <span class="ln" aria-hidden="true">01</span>
+      <div class="hero-kicker">Córdoba, Argentina</div>
+
+      <div class="terminal">
+        <div class="terminal-bar">
+          <span style="background:#e5645b"></span>
+          <span style="background:#e8b13d"></span>
+          <span style="background:#6bbf7a"></span>
+          <span class="title">hernan@portfolio — zsh</span>
+        </div>
+        <div class="terminal-body" id="termBody">
+          <p class="terminal-line"><span class="prompt">$</span> <span class="cmd">whoami</span></p>
+          <p class="terminal-out" id="termName">Hernán Navarro<span class="caret" id="caret1"></span></p>
+          <p class="terminal-line" id="termQueryLine" style="visibility:hidden"><span class="prompt">$</span> <span class="cmd">cat rol.txt</span></p>
+          <p class="terminal-sub" id="termRole" style="visibility:hidden">Ssr. Software Engineer - Mercado Libre</p>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <a class="btn primary" href="#contacto">Hablemos <span aria-hidden="true">→</span></a>
+        <a class="btn" href="https://github.com/hernanavarro" target="_blank" rel="noopener">Ver GitHub</a>
+        <a class="btn" href="https://www.linkedin.com/in/navarrohernan/" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </section>
+
+    <section id="sobre-mi">
+      <span class="ln" aria-hidden="true">02</span>
+      <div class="section-head">
+        <div class="eyebrow">01 · Sobre mí</div>
+        <h2 class="section-title">Ingeniero de sistemas, curioso de oficio</h2>
+      </div>
+      <div class="about-grid">
+        <div class="about-text">
+          <p>Fanático de la tecnología y de cómo se aplica para resolver problemas cotidianos. Trabajo hoy como Ssr. Software Engineer en Mercado Libre, dentro del equipo de Mercado Envíos, y curso los últimos tramos de Ingeniería en Sistemas en la Universidad Católica de Córdoba.</p>
+          <p>Me gusta encarar desafíos nuevos y aprender en el camino, sobre todo trabajando en equipo: es la forma en la que mejor aprendo y en la que más disfruto construir software. Fuera del código, el resto del tiempo se reparte entre el deporte y juntadas con amigos.</p>
+        </div>
+        <dl class="facts">
+          <div class="fact"><dt>Ubicación</dt><dd>Córdoba, Argentina</dd></div>
+          <div class="fact"><dt>Rol actual</dt><dd>Ssr. Software Engineer - Mercado Libre</dd></div>
+          <div class="fact"><dt>Formación</dt><dd>Ing. en Sistemas — UCC [en curso]</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section id="experiencia">
+      <span class="ln" aria-hidden="true">03</span>
+      <div class="section-head">
+        <div class="eyebrow">02 · Experiencia</div>
+        <h2 class="section-title">Dónde construí</h2>
+      </div>
+      <div class="timeline">
+        <div class="job">
+          <div class="job-period">Mar 2021 — <span class="current">actualidad</span></div>
+          <div>
+            <h3 class="job-role">Ssr. Software Engineer</h3>
+            <p class="job-org">Mercado Libre</p>
+            <p class="job-desc">Equipo de Mercado Envíos, en el frente de Onboarding: desarrollo y mantenimiento de sistemas que dan de alta y acompañan a nuevos usuarios dentro de la plataforma logística.</p>
+          </div>
+        </div>
+        <div class="job">
+          <div class="job-period">May 2019 — Ago 2019</div>
+          <div>
+            <h3 class="job-role">Pasante ICT — End User</h3>
+            <p class="job-org">CNH Industrial (Iveco)</p>
+            <p class="job-desc">Asignación y mantenimiento de hardware, software y telefonía celular para todas las plantas de la compañía.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stack">
+      <span class="ln" aria-hidden="true">04</span>
+      <div class="section-head">
+        <div class="eyebrow">03 · Stack</div>
+        <h2 class="section-title">Con qué trabajo</h2>
+      </div>
+      <div class="soft-skills" style="margin-top:0; padding-top:0; border-top:none;">
+        <h3>Tecnologías</h3>
+        <div class="chip-row">
+          <span class="chip chip-tech">Java</span>
+          <span class="chip chip-tech">Go</span>
+          <span class="chip chip-tech">SQL</span>
+          <span class="chip chip-tech">NoSQL</span>
+          <span class="chip chip-tech">React</span>
+        </div>
+      </div>
+
+      <div class="soft-skills">
+        <h3>Además</h3>
+        <div class="chip-row">
+          <span class="chip">Scrum</span>
+          <span class="chip">Trabajo en equipo</span>
+          <span class="chip">Metodologías ágiles</span>
+          <span class="chip">Adaptación al cambio</span>
+          <span class="chip">Aprendizaje continuo</span>
+          <span class="chip">Gestión de equipo</span>
+          <span class="chip">Gestión de iniciativas</span>
+          <span class="chip">Manejo de clientes</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="proyectos">
+      <span class="ln" aria-hidden="true">05</span>
+      <div class="section-head">
+        <div class="eyebrow">04 · Proyectos</div>
+        <h2 class="section-title">Práctica y proyectos personales</h2>
+      </div>
+      <div class="project-grid">
+        <a class="project-card" href="https://github.com/hernanavarro/node-restserver" target="_blank" rel="noopener">
+          <div class="project-top"><span class="project-name">node-restserver</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+          <p class="project-desc">API REST en Node.js con autenticación, subida de archivos y base de datos — proyecto de formación en backend.</p>
+          <span class="project-lang">JavaScript</span>
+        </a>
+        <a class="project-card" href="https://github.com/hernanavarro/webserver-express" target="_blank" rel="noopener">
+          <div class="project-top"><span class="project-name">webserver-express</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+          <p class="project-desc">Servidor con Express y Handlebars, desplegado en Heroku, para practicar el ciclo completo de un backend.</p>
+          <span class="project-lang">JavaScript</span>
+        </a>
+        <a class="project-card" href="https://github.com/hernanavarro/clima-app-node" target="_blank" rel="noopener">
+          <div class="project-top"><span class="project-name">clima-app-node</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+          <p class="project-desc">Aplicación de consola en Node.js que consume una API externa de clima.</p>
+          <span class="project-lang">JavaScript</span>
+        </a>
+        <a class="project-card" href="https://github.com/hernanavarro/TuLibro" target="_blank" rel="noopener">
+          <div class="project-top"><span class="project-name">TuLibro</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+          <p class="project-desc">Proyecto personal en JavaScript, parte de mi práctica fuera del trabajo diario.</p>
+          <span class="project-lang">JavaScript</span>
+        </a>
+      </div>
+      <p class="project-more">Más repositorios en <a href="https://github.com/hernanavarro" target="_blank" rel="noopener">github.com/hernanavarro →</a></p>
+    </section>
+
+    <section id="educacion">
+      <span class="ln" aria-hidden="true">06</span>
+      <div class="section-head">
+        <div class="eyebrow">05 · Educación</div>
+        <h2 class="section-title">Formación e idiomas</h2>
+      </div>
+      <div class="split">
+        <div>
+          <div class="edu-item">
+            <div class="edu-school">Universidad Católica de Córdoba</div>
+            <div class="edu-degree">Ingeniería en Sistemas — Facultad de Ingeniería</div>
+            <div class="edu-period">2015 — actualidad · rindiendo últimas materias y tesis en proceso</div>
+          </div>
+          <div class="edu-item">
+            <div class="edu-school">Instituto Padre Claret</div>
+            <div class="edu-degree">Bachiller en Gestión y Administración de las Organizaciones</div>
+            <div class="edu-period">2009 — 2014</div>
+          </div>
+        </div>
+        <ul class="lang-list">
+          <li><span>Español</span><span class="lang-level">Nativo</span></li>
+          <li><span>Inglés</span><span class="lang-level">Básico</span></li>
+          <li><span>Portugués</span><span class="lang-level">Básico</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="contacto" class="contact-section">
+      <span class="ln" aria-hidden="true">07</span>
+      <div class="section-head">
+        <div class="eyebrow">06 · Contacto</div>
+        <h2 class="section-title">Hablemos</h2>
+      </div>
+      <div class="contact-box">
+        <h2>¿Un proyecto, una vacante o simplemente charlar de tecnología?</h2>
+        <p>Siempre abierto a nuevos desafíos y a sumar valor en nuevos proyectos. Escribime por mail o LinkedIn y te respondo a la brevedad.</p>
+        <div class="contact-links">
+          <a class="btn primary" href="mailto:navarro.hernan97@gmail.com">navarro.hernan97@gmail.com</a>
+          <a class="btn" href="https://www.linkedin.com/in/navarrohernan/" target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a class="btn" href="https://github.com/hernanavarro" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <span>© 2026 Hernán Navarro</span>
+  <span>Córdoba, Argentina</span>
+</footer>
+
+<script>
+(function () {
+  // Terminal reveal sequence
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var queryLine = document.getElementById('termQueryLine');
+  var role = document.getElementById('termRole');
+  var caret1 = document.getElementById('caret1');
+
+  function reveal() {
+    if (caret1) caret1.remove();
+    if (queryLine) queryLine.style.visibility = 'visible';
+    if (role) role.style.visibility = 'visible';
+  }
+  if (reduced) {
+    reveal();
+  } else {
+    setTimeout(reveal, 850);
+  }
+
+  // Active nav highlighting
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-tree a, .mobile-nav a'));
+
+  function setActive(id) {
+    navLinks.forEach(function (a) {
+      var isMatch = a.getAttribute('href') === '#' + id;
+      a.classList.toggle('active', isMatch);
+      var li = a.closest('li');
+      if (li) li.classList.toggle('active', isMatch);
+    });
+  }
+
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) setActive(entry.target.id);
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    sections.forEach(function (s) { observer.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
